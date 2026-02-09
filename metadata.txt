@@ -1,0 +1,9 @@
+# Metadata
+**Category:** - Coding
+**Topic:** - Competitive Programming
+**Subtopic:** - ["Algorithm Complexity and Big O Notation", "Functions and Recursion"]
+**Difficulty:** - Hard
+**Languages:** - Python
+**Number of Approaches:** - 3, ($O\left(\frac{n}{d}\cdot\frac{n}{c}\right)$ -> $O\left(\frac{n}{d}\right)$ -> $O(\log N)$)
+**Number of Chains:** - 7
+**Model-Breaking:** - True

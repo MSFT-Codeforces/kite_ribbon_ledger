@@ -1,0 +1,65 @@
+
+You are an expert competitive programmer. 
+You will be provided with a problem statement, first analyze the problem, then provide your solution in Python. 
+Consider edge cases, time complexity, and space complexity. 
+Make sure your solution handles all constraints mentioned in the problem. 
+Your final solution should be a complete, compilable Python program in a python codeblock.
+
+**Kite Ribbon Ledger**
+
+A merchant sells kites of two types:
+
+- TwinTail kite uses exactly $2$ ribbons.
+- QuadTail kite uses exactly $4$ ribbons.
+
+For each test case you are given integers $n, c, d, p$:
+
+- The number of TwinTail kites must be a multiple of $c$ (they come in cartons of $c$).
+- The number of QuadTail kites must be a multiple of $d$ (they come in fleets of $d$).
+- The total number of ribbons used by all kites must be exactly $n$.
+- The total number of kites must be divisible by $p$.
+
+Let $A$ be the number of TwinTail kites and $B$ be the number of QuadTail kites. Then:
+
+- $2A + 4B = n$
+- $A \equiv 0 \pmod c$
+- $B \equiv 0 \pmod d$
+- $(A + B) \equiv 0 \pmod p$
+- $A, B \ge 0$ and integers
+
+For each test case, output the minimum possible value of $A + B$, or $-1$ if it is impossible.
+
+**Input Format:-**
+
+The first line contains an integer $t$ — the number of test cases.  
+Each of the next $t$ lines contains four integers $n, c, d, p$.
+
+**Output Format:-**
+
+For each test case, print one integer — the minimum possible total number of kites, or $-1$ if no valid shipment exists.
+
+**Constraints:-**
+
+- $1 \le n \le 10^{18}$
+- $1 \le c, d \le 10^{9}$
+- $1 \le p \le 10^{18}$
+
+**Examples:-**
+ - **Input:**
+```
+5
+10 3 2 5
+40 3 2 5
+28 2 3 4
+48 5 1 6
+16 3 5 2
+```
+
+ - **Output:**
+```
+-1
+10
+8
+12
+-1
+```

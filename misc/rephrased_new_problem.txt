@@ -1,0 +1,368 @@
+## Problem: Sky-Kite Ribbon Ledger — Batch Shipping Rule
+
+In the floating city of **Aerialis**, a merchant sells only two kite designs:
+
+- **TwinTail** kites: each uses exactly **2 ribbons**
+- **QuadTail** kites: each uses exactly **4 ribbons**
+
+However, suppliers are strict:
+
+- TwinTail kites arrive only in **sealed cartons of exactly `c` kites**  
+  (so the number of TwinTail kites must be a multiple of `c`)
+- QuadTail kites arrive only in **fleets of exactly `d` kites**  
+  (so the number of QuadTail kites must be a multiple of `d`)
+
+After a windy delivery day, the clerk counts **exactly `n` ribbons** in total across all kites.
+
+And for the upcoming parade, the city requires that the **total number of kites** (TwinTail + QuadTail) must be divisible by **`p`**.
+
+For each test case, determine the **minimum possible total number of kites** that satisfies all rules, or print `-1` if it cannot be done.
+
+---
+
+### Input Format
+- First line: integer `t` — number of test cases.
+- Next `t` lines: four integers `n c d p`
+  - `1 ≤ n ≤ 10^18`
+  - `1 ≤ c, d ≤ 10^9`
+  - `1 ≤ p ≤ 10^18`
+
+### Output Format
+For each test case, output a single integer: the minimum possible total number of kites, or `-1` if impossible.
+
+---
+
+### Sample Input
+```
+5
+10 3 2 5
+40 3 2 5
+28 2 3 4
+48 5 1 6
+16 3 5 2
+```
+
+### Sample Output
+```
+-1
+10
+8
+12
+-1
+```
+
+---
+
+## Editorial (Solution Idea)
+
+Let:
+- `x` = number of QuadTail fleets, so **QuadTail count** = `d·x`
+- `y` = number of TwinTail cartons, so **TwinTail count** = `c·y`
+
+Here `x, y` are nonnegative integers.
+
+### 1) Ribbon equation
+Total ribbons:
+\[
+4(d x) + 2(c y) = n
+\]
+Left side is always even, so if `n` is odd → **impossible** → `-1`.
+
+Assume `n` is even and divide by 2:
+\[
+2 d x + c y = \frac{n}{2}
+\]
+
+### 2) What are we minimizing?
+Total kites:
+\[
+K = (d x) + (c y)
+\]
+From the equation:
+\[
+c y = \frac{n}{2} - 2 d x
+\]
+So:
+\[
+K = d x + \left(\frac{n}{2} - 2 d x\right) = \frac{n}{2} - d x
+\]
+Thus, **minimizing `K` is equivalent to maximizing `x`**.
+
+Also `y ≥ 0` implies:
+\[
+\frac{n}{2} - 2 d x \ge 0 \Rightarrow x \le \left\lfloor\frac{n}{4d}\right\rfloor = L
+\]
+
+So we need the **largest feasible** `x` with `0 ≤ x ≤ L`.
+
+---
+
+### 3) Convert conditions into congruences on `x`
+
+#### (A) `y` must be an integer
+\[
+y = \frac{n - 4 d x}{2 c}
+\]
+So:
+\[
+n - 4 d x \equiv 0 \pmod{2c}
+\Rightarrow 4 d x \equiv n \pmod{2c}
+\]
+
+#### (B) Total kites divisible by `p`
+\[
+K = \frac{n}{2} - d x \equiv 0 \pmod p
+\Rightarrow d x \equiv \frac{n}{2} \pmod p
+\]
+
+So `x` must satisfy **two linear congruences**:
+\[
+4 d x \equiv n \pmod{2c},\qquad d x \equiv \frac{n}{2} \pmod p
+\]
+
+---
+
+### 4) Solving a linear congruence
+To solve:
+\[
+a x \equiv b \pmod m
+\]
+Let \(g=\gcd(a,m)\). A solution exists iff \(g \mid b\). If yes, divide by `g` to get:
+\[
+a' x \equiv b' \pmod{m'}
+\]
+with \(\gcd(a',m')=1\). Then:
+\[
+x \equiv b' \cdot (a')^{-1} \pmod{m'}
+\]
+(using extended Euclid for the modular inverse).
+
+This yields:
+\[
+x \equiv r_1 \pmod{m_1},\qquad x \equiv r_2 \pmod{m_2}
+\]
+
+---
+
+### 5) Merge both congruences (generalized CRT)
+Combine them via generalized CRT (works even if moduli are not coprime):
+
+- If inconsistent → `-1`
+- Otherwise get:
+\[
+x \equiv r \pmod M
+\]
+
+---
+
+### 6) Choose the maximum feasible `x`
+All solutions are:
+\[
+x = r + kM
+\]
+We want the largest `x ≤ L`.
+
+- If `r > L` → no solution → `-1`
+- Else:
+\[
+x = r + \left\lfloor \frac{L-r}{M} \right\rfloor M
+\]
+
+Finally:
+\[
+K = \frac{n}{2} - d x
+\]
+
+---
+
+### Complexity
+Per test case: **O(log(max(c,d,p)))** time, **O(1)** memory.
+
+---
+
+## Reference Implementation (C++17)
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+using int64 = long long;
+using i128 = __int128_t;
+
+static inline int64 ll_gcd(int64 a, int64 b) {
+    while (b) { int64 t = a % b; a = b; b = t; }
+    return a >= 0 ? a : -a;
+}
+
+static inline i128 i128_gcd(i128 a, i128 b) {
+    if (a < 0) a = -a;
+    if (b < 0) b = -b;
+    while (b != 0) {
+        i128 t = a % b;
+        a = b;
+        b = t;
+    }
+    return a;
+}
+
+// extended gcd for int64
+static int64 ext_gcd(int64 a, int64 b, int64 &x, int64 &y) {
+    x = 1; y = 0;
+    int64 x1 = 0, y1 = 1;
+    while (b != 0) {
+        int64 q = a / b;
+        int64 a2 = a - q * b; a = b; b = a2;
+        int64 x2 = x - q * x1; x = x1; x1 = x2;
+        int64 y2 = y - q * y1; y = y1; y1 = y2;
+    }
+    if (a < 0) { a = -a; x = -x; y = -y; }
+    return a;
+}
+
+static int64 mod_norm(i128 a, int64 m) {
+    i128 r = a % m;
+    if (r < 0) r += m;
+    return (int64)r;
+}
+
+static int64 mod_inv(int64 a, int64 m) {
+    // assumes gcd(a,m)=1, m>=1
+    int64 x, y;
+    int64 g = ext_gcd(a, m, x, y);
+    // g should be 1
+    (void)g;
+    i128 res = (i128)x % m;
+    if (res < 0) res += m;
+    return (int64)res;
+}
+
+struct Cong {
+    i128 r;   // residue
+    i128 m;   // modulus, positive
+};
+
+// Solve a*x ≡ b (mod m). Return x ≡ r (mod mod), or nullopt.
+static optional<Cong> solve_linear_congruence(i128 a, i128 b, i128 m) {
+    if (m == 1) return Cong{0, 1};
+
+    // Reduce into int64 where safe for gcd checks (m <= 1e18 here in usage)
+    // We'll do gcd on i128 anyway.
+    a %= m; if (a < 0) a += m;
+    b %= m; if (b < 0) b += m;
+
+    i128 g = i128_gcd(a, m);
+    if (b % g != 0) return nullopt;
+
+    a /= g; b /= g; m /= g;
+    if (m == 1) return Cong{0, 1};
+
+    // Now gcd(a,m)=1, and m fits in int64 for our problem (<=1e18).
+    int64 mm = (int64)m;
+    int64 aa = mod_norm(a, mm);
+    int64 bb = mod_norm(b, mm);
+
+    int64 inv = mod_inv(aa, mm);
+    int64 r = (int64)((i128)bb * inv % mm);
+    return Cong{(i128)r, (i128)mm};
+}
+
+// Generalized CRT for:
+// x ≡ a1 (mod m1)
+// x ≡ a2 (mod m2)
+static optional<Cong> crt_merge(Cong A, Cong B) {
+    i128 a1 = A.r, m1 = A.m;
+    i128 a2 = B.r, m2 = B.m;
+
+    if (m1 == 1) return Cong{(a2 % m2 + m2) % m2, m2};
+    if (m2 == 1) return Cong{(a1 % m1 + m1) % m1, m1};
+
+    i128 g = i128_gcd(m1, m2);
+    i128 diff = a2 - a1;
+    if (diff % g != 0) return nullopt;
+
+    // k solves: m1*k ≡ diff (mod m2)
+    i128 m1g = m1 / g;
+    i128 m2g = m2 / g;
+
+    // Reduce to: (m1/g) * k ≡ (diff/g) (mod m2/g)
+    // m2g <= 1e18 in our usage, so inverse is safe in int64.
+    int64 mod2 = (int64)m2g;
+    int64 lhs = mod_norm(m1g, mod2);
+    int64 rhs = mod_norm(diff / g, mod2);
+
+    int64 k = 0;
+    if (mod2 != 1) {
+        int64 inv = mod_inv(lhs, mod2);
+        k = (int64)((i128)rhs * inv % mod2);
+    }
+
+    i128 lcm = m1g * m2; // = lcm(m1,m2), fits in i128 for given constraints
+    i128 x = a1 + m1 * (i128)k;
+    x %= lcm;
+    if (x < 0) x += lcm;
+    return Cong{x, lcm};
+}
+
+static string to_string_i128(i128 x) {
+    if (x == 0) return "0";
+    bool neg = false;
+    if (x < 0) { neg = true; x = -x; }
+    string s;
+    while (x > 0) {
+        int digit = (int)(x % 10);
+        s.push_back(char('0' + digit));
+        x /= 10;
+    }
+    if (neg) s.push_back('-');
+    reverse(s.begin(), s.end());
+    return s;
+}
+
+static i128 solve_one(i128 n, i128 c, i128 d, i128 p) {
+    if (n & 1) return -1;
+
+    // upper bound from 4*d*x <= n
+    i128 L = n / (4 * d);
+
+    // (1) 4*d*x ≡ n (mod 2*c)
+    auto s1 = solve_linear_congruence(4 * d, n, 2 * c);
+    if (!s1) return -1;
+
+    // (2) d*x ≡ n/2 (mod p)
+    auto s2 = solve_linear_congruence(d, n / 2, p);
+    if (!s2) return -1;
+
+    // merge
+    auto merged = crt_merge(*s1, *s2);
+    if (!merged) return -1;
+
+    i128 r = merged->r;
+    i128 mod = merged->m;
+
+    if (r > L) return -1;
+
+    // maximum x <= L with x ≡ r (mod mod)
+    i128 k = (L - r) / mod;
+    i128 x = r + k * mod;
+
+    i128 kites = n / 2 - d * x;
+    return kites;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+    while (t--) {
+        long long n, c, d, p;
+        cin >> n >> c >> d >> p;
+        i128 ans = solve_one((i128)n, (i128)c, (i128)d, (i128)p);
+        cout << to_string_i128(ans) << "\n";
+    }
+    return 0;
+}
+```
+
+If you want, I can also provide a version that prints not only the minimum number of kites but one valid shipment composition (how many TwinTail and QuadTail).

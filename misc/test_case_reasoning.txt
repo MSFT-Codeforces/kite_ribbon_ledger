@@ -1,0 +1,91 @@
+### Corrections and refined reasoning (factual fixes applied)
+
+#### Core reformulation (still valid)
+- Set \(A=cx\), \(B=dy\) with \(x,y\in\mathbb Z_{\ge 0}\).
+- From \(2A+4B=n\) we get \(A+2B=n/2\). Let \(m=n/2\).
+  - If \(n\) is odd, **impossible** immediately.
+- Main equation:  
+  \[
+  cx + 2dy = m
+  \]
+- Total kites:
+  \[
+  A+B = cx+dy = (m-2dy)+dy = m-dy
+  \]
+  So minimizing \(A+B\) ⇔ maximizing \(y\), subject to:
+  - \(0 \le y \le \left\lfloor \frac{m}{2d}\right\rfloor\)
+  - \(m-2dy \equiv 0 \pmod c\)
+  - \(m-dy \equiv 0 \pmod p\)
+
+Also note the useful bound:
+- Since \(A+B=m-dy\) and \(dy\in[0,m/2]\), we always have:
+  \[
+  \lceil m/2\rceil \le A+B \le m
+  \]
+  Hence if \(p>m\), there is **no positive** multiple of \(p\) achievable (and \(A+B\neq 0\) since \(n\ge 1\)), so answer must be \(-1\).
+
+---
+
+## 1) Input range boundaries (min/max)
+Target extremes for each parameter:
+
+- **Small \(n\)**: \(n=1,2,3,4\) behavior:
+  - Odd \(n\Rightarrow -1\).
+  - Very small even \(n\) where only \(A\) works (e.g. \(n=2\)) or \(B\) may be possible (e.g. \(n=4\)).
+- **Large \(n\)**: \(n=10^{18}\) (even and odd) to stress arithmetic and ensure no slow loops.
+- **Extreme \(c,d\)**:
+  - \(c=1\) and/or \(d=1\): large feasible space (worst for brute-force).
+  - \(c=10^9\), \(d=10^9\): very restrictive; often forces \(x=0\) or \(y=0\).
+- **Extreme \(p\)**:
+  - \(p=1\): removes divisibility constraint; reduces to maximizing \(y\) under carton constraints.
+  - \(p\) near \(10^{18}\): often impossible, especially when \(p>m\).
+
+---
+
+## 2) Structural edge cases (degenerate solution shapes)
+Even without arrays, the feasible-set “shape” matters:
+
+- **All TwinTail (\(B=0\))**:
+  - Requires \(m\equiv 0\pmod c\) (since \(A=m\)) and \(m\equiv 0\pmod p\) (since \(A+B=m\)).
+  - Include cases that fail only due to \(p\), and cases that fail only due to \(c\).
+- **All QuadTail (\(A=0\))** (correction):
+  - From \(A+2B=m\) with \(A=0\): \(2B=m\Rightarrow m\) divisible by \(2d\) (since \(B=dy\)).
+  - Total kites \(A+B=B=dy=m/2\) must satisfy \(\frac{m}{2}\equiv 0\pmod p\).
+  - This is a clean corner case that catches wrong handling of the \(p\) constraint.
+- **Unique feasible solution**:
+  - Make \(y\) forced by the tight upper bound \(y\le \lfloor m/(2d)\rfloor\) plus congruences.
+- **Many feasible solutions**:
+  - Small \(c,d,p\), huge \(n\): many valid \(y\); must pick the one with **maximum \(y\)** (minimum \(A+B\)).
+- **Feasible for one congruence but not the other**:
+  - Ensure \(m-2dy\equiv 0\pmod c\) has solutions but \(m-dy\equiv 0\pmod p\) blocks them, and vice versa.
+
+---
+
+## 3) Stress conditions (worst-case performance patterns)
+Design cases that defeat naive enumeration:
+
+- **Huge \(y\)-range**:
+  - \(d=1\), \(n\approx 10^{18}\) gives \(y\le \sim 2.5\times 10^{17}\); any loop over \(y\) is infeasible.
+- **Non-coprime modular constraints**:
+  - The two conditions are on \(dy\) modulo \(p\) and \(2dy\) modulo \(c\). Choosing \(c\) and \(p\) with large shared gcds forces careful gcd-based modular solving (not simple inverses).
+- **Upper-bound off-by-one traps**:
+  - Make the best valid \(y\) equal to \(y_{\max}\), and also cases where the best is \(y_{\max}-1\) because \(y_{\max}\) fails a congruence.
+
+---
+
+## 4) Common implementation mistakes to expose
+- **Forgetting \(n\) even** → odd \(n\) must output \(-1\).
+- **Using only \(\gcd(c,2d)\mid m\) as “complete” feasibility**:
+  - That condition is necessary for integer solutions to \(cx+2dy=m\), but **not sufficient** for nonnegative \(x,y\) and the extra \(p\)-divisibility. Include cases where gcd check passes but nonnegativity or \(p\) kills all solutions.
+- **Incorrect modular inverse usage**:
+  - Inverses don’t exist when gcd \(\ne 1\); must use extended-gcd / congruence solving with gcd.
+- **Minimization direction mistake**:
+  - Some might minimize \(y\) instead of maximize; include cases where a small \(y\) solution exists but a much larger \(y\) gives a smaller \(A+B\).
+- **Overflow risks (correction)**:
+  - Direct values like \(dy\), \(2dy\), \(cx\) are actually bounded by \(\le m\le 5\times 10^{17}\), so they’re safe in 64-bit.
+  - The real overflow danger is in **intermediate math** (CRT/lcm-style computations), e.g. products like \((c/g)\cdot p\) can reach \(\sim 10^{27}\). Include cases with \(c\approx 10^9\), \(p\approx 10^{18}\) to catch missing `__int128`.
+
+---
+
+## 5) Invalid input
+Not applicable here (inputs are within stated constraints and always “validly formatted”), so focus on valid-but-tricky cases only.

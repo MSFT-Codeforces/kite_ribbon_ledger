@@ -1,0 +1,284 @@
+## Problem: Spaceport Nozzle Audit — Maintenance Batch Constraint
+
+At the orbital spaceport **Kepler-17**, the quartermaster stocks only two craft models:
+
+- **Darts** — each has exactly **2 ion nozzles**
+- **Mules** — each has exactly **4 ion nozzles**
+
+Shipping regulations:
+
+- Darts arrive only in **sealed pallets of exactly `c` Darts**  
+  (so the number of Darts must be a multiple of `c`)
+- Mules arrive only in **convoys of exactly `d` Mules**  
+  (so the number of Mules must be a multiple of `d`)
+
+During an inspection, the engineer counts exactly **`n` ion nozzles** in total.
+
+Additionally, the port runs maintenance in batches: the **total number of craft** at the port (Darts + Mules) must be divisible by **`p`**.
+
+For each test case, determine the **minimum possible total number of craft** that satisfies **all** rules, or output `-1` if impossible.
+
+---
+
+### Input Format
+- The first line contains an integer `t` — the number of test cases.
+- Each of the next `t` lines contains four integers `n, c, d, p`:
+  - `1 ≤ n ≤ 10^18`
+  - `1 ≤ c, d ≤ 10^9`
+  - `1 ≤ p ≤ 10^18`
+
+### Output Format
+For each test case, output one integer — the minimum possible total number of craft, or `-1` if impossible.
+
+---
+
+## Editorial
+
+For a test case, let:
+
+- `x` = number of Mule convoys ⇒ number of Mules = `d·x`
+- `y` = number of Dart pallets ⇒ number of Darts = `c·y`
+
+Both `x, y` must be **nonnegative integers**.
+
+### 1) Nozzle equation
+Total nozzles:
+\[
+4(d x) + 2(c y) = n
+\]
+If `n` is odd, the left-hand side is always even, so **no solution** ⇒ answer `-1`.
+
+Assume `n` is even. Divide by 2:
+\[
+2 d x + c y = \frac{n}{2}
+\]
+
+### 2) Objective: minimize total craft
+Total craft:
+\[
+\text{craft} = d x + c y
+\]
+From the halved equation:
+\[
+c y = \frac{n}{2} - 2 d x
+\]
+So
+\[
+\text{craft} = d x + \left(\frac{n}{2} - 2 d x\right) = \frac{n}{2} - d x
+\]
+Thus, **minimizing craft is equivalent to maximizing `x`** (since `d > 0`).
+
+Also, since `y ≥ 0`:
+\[
+\frac{n}{2} - 2 d x \ge 0 \Rightarrow x \le \left\lfloor \frac{n}{4d} \right\rfloor = L
+\]
+So we need the **largest** feasible `x` with \(0 \le x \le L\).
+
+### 3) Constraints become congruences in `x`
+
+#### (A) `y` must be an integer
+From the original equation:
+\[
+y = \frac{n - 4 d x}{2 c}
+\]
+So we require:
+\[
+n - 4 d x \equiv 0 \pmod{2c}
+\Rightarrow 4 d x \equiv n \pmod{2c}
+\]
+This is a linear congruence in `x`.
+
+#### (B) Total craft divisible by `p`
+We need:
+\[
+\text{craft} = \frac{n}{2} - d x \equiv 0 \pmod p
+\Rightarrow d x \equiv \frac{n}{2} \pmod p
+\]
+This is another linear congruence in `x`.
+
+So `x` must satisfy both:
+\[
+4 d x \equiv n \pmod{2c},\qquad d x \equiv \frac{n}{2} \pmod p
+\]
+
+### 4) Solving a linear congruence
+To solve \(a x \equiv b \pmod m\):
+
+Let \(g=\gcd(a,m)\). A solution exists iff \(g \mid b\).  
+If it exists, divide by `g`:
+\[
+a' x \equiv b' \pmod{m'}
+\]
+with \(\gcd(a',m')=1\), so:
+\[
+x \equiv b' \cdot (a')^{-1} \pmod{m'}
+\]
+(using modular inverse via extended Euclid).
+
+This yields a reduced form:
+\[
+x \equiv r_i \pmod{m_i}
+\]
+
+### 5) Combine the two congruences (generalized CRT)
+Now combine:
+\[
+x \equiv r_1 \pmod{m_1},\qquad x \equiv r_2 \pmod{m_2}
+\]
+using generalized CRT (works even if \(m_1,m_2\) are not coprime). If inconsistent ⇒ `-1`.  
+Otherwise we get:
+\[
+x \equiv r \pmod m
+\]
+where \(m=\mathrm{lcm}(m_1,m_2)\).
+
+### 6) Pick the maximum feasible `x` and compute the answer
+We need the largest \(x \le L\) in this progression:
+- If `r > L` ⇒ no feasible `x` ⇒ `-1`
+- Else:
+\[
+x = r + \left\lfloor \frac{L-r}{m} \right\rfloor m
+\]
+
+Then the minimum craft count is:
+\[
+\text{craft} = \frac{n}{2} - d x
+\]
+(Guaranteed integer when feasible.)
+
+### Complexity
+Per test case: \(O(\log(\max(c,d,p)))\) time, \(O(1)\) extra space.
+
+---
+
+## Reference Implementation (Python 3)
+
+```python
+import sys
+import math
+
+def egcd(a: int, b: int):
+    """Return (g, x, y) such that a*x + b*y = g = gcd(a,b)."""
+    x0, y0, x1, y1 = 1, 0, 0, 1
+    while b:
+        q = a // b
+        a, b = b, a - q * b
+        x0, x1 = x1, x0 - q * x1
+        y0, y1 = y1, y0 - q * y1
+    return a, x0, y0
+
+def modinv(a: int, m: int) -> int:
+    """Return inverse of a modulo m, assuming gcd(a, m) == 1 and m >= 2."""
+    g, x, _ = egcd(a, m)
+    if g != 1:
+        raise ValueError("modular inverse does not exist")
+    return x % m
+
+def solve_linear_congruence(a: int, b: int, m: int):
+    """
+    Solve a*x ≡ b (mod m).
+    Return (r, mod) meaning x ≡ r (mod mod), mod>0,
+    or None if no solution.
+    """
+    if m == 1:
+        return (0, 1)
+
+    a %= m
+    b %= m
+    g = math.gcd(a, m)
+    if b % g != 0:
+        return None
+
+    a //= g
+    b //= g
+    m //= g
+
+    if m == 1:
+        return (0, 1)
+
+    inv = modinv(a % m, m)  # gcd(a,m)=1
+    r = (b * inv) % m
+    return (r, m)
+
+def crt(a1: int, m1: int, a2: int, m2: int):
+    """
+    Generalized CRT:
+      x ≡ a1 (mod m1)
+      x ≡ a2 (mod m2)
+    Return (a, m) with x ≡ a (mod m), where m=lcm(m1,m2),
+    or None if inconsistent.
+    """
+    if m1 == 1:
+        return (a2 % m2, m2)
+    if m2 == 1:
+        return (a1 % m1, m1)
+
+    g = math.gcd(m1, m2)
+    diff = a2 - a1
+    if diff % g != 0:
+        return None
+
+    m1g = m1 // g
+    m2g = m2 // g
+
+    # Solve (m1/g) * k ≡ (diff/g) (mod m2/g)
+    rhs = (diff // g) % m2g
+
+    if m2g == 1:
+        k = 0
+    else:
+        inv = modinv(m1g % m2g, m2g)  # gcd(m1g,m2g)=1
+        k = (rhs * inv) % m2g
+
+    lcm = m1g * m2  # = lcm(m1, m2)
+    a = (a1 + m1 * k) % lcm
+    return (a, lcm)
+
+def solve_case(n: int, c: int, d: int, p: int) -> int:
+    if n & 1:
+        return -1
+
+    # x upper bound from 4*d*x <= n
+    L = n // (4 * d)
+
+    # (1) 4*d*x ≡ n (mod 2*c)
+    sol1 = solve_linear_congruence(4 * d, n, 2 * c)
+    if sol1 is None:
+        return -1
+    r1, m1 = sol1
+
+    # (2) d*x ≡ n/2 (mod p)
+    sol2 = solve_linear_congruence(d, n // 2, p)
+    if sol2 is None:
+        return -1
+    r2, m2 = sol2
+
+    merged = crt(r1, m1, r2, m2)
+    if merged is None:
+        return -1
+    r, mod = merged  # x ≡ r (mod mod)
+
+    if r > L:
+        return -1
+
+    # maximum x <= L in this residue class
+    x = r + ((L - r) // mod) * mod
+
+    # minimum craft
+    craft = n // 2 - d * x
+    return craft
+
+def main():
+    data = list(map(int, sys.stdin.buffer.read().split()))
+    t = data[0]
+    out = []
+    idx = 1
+    for _ in range(t):
+        n, c, d, p = data[idx], data[idx + 1], data[idx + 2], data[idx + 3]
+        idx += 4
+        out.append(str(solve_case(n, c, d, p)))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    main()
+```
