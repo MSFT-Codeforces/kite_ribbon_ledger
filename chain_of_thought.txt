@@ -269,7 +269,7 @@ Per test case, the time complexity is $O(\log N)$ where $N$ reflects the size of
 ---
 
 **[section_06]**
-**Chain Title:** Validate the derived conditions with targeted checks and invariants.
+**Chain Title:** Explore checking invariants and derived conditions.
 **[atomic_06_01]**
 We select this approach as validation of section_05: confirm invariants and bounds before implementation. A key invariant is parity: if $n$ is odd, output must be $-1$. This should be treated as a hard precondition before performing any modular steps, because otherwise expressions like $\frac{n}{2}$ are not integral and the derived congruences no longer match the original integer problem.
 **[atomic_06_02]**
@@ -301,7 +301,7 @@ These are not alternate solution methods, but consistency checks on boundary beh
 ---
 
 **[section_07]**
-**Chain Title:** Prevent arithmetic and modular pitfalls during implementation.
+**Chain Title:** Explore implementation pitfalls for arithmetic and modular steps.
 **[atomic_07_01]**
 We select this approach as implementation guidance for section_05/06: handle overflow and edge moduli. Intermediate values can exceed 64-bit limits even when inputs fit in 64-bit. Examples include:
 - Products like $4d$, $2c$, and especially terms like $m_1 \cdot m_2$ when forming an $\operatorname{lcm}$-like modulus during CRT merging.
