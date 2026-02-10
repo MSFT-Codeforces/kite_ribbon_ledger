@@ -7,3 +7,4 @@
 **Number of Approaches:** - 3, ($O\left(\frac{n}{d}\cdot\frac{n}{c}\right)$ -> $O\left(\frac{n}{d}\right)$ -> $O(\log N)$)
 **Number of Chains:** - 7
 **Model-Breaking:** - True
+**GitHub:** - https://github.com/MSFT-Codeforces/kite_ribbon_ledger

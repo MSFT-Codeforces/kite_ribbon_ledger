@@ -1,13 +1,13 @@
 {
-  "original": "https://www.codeforces.com/problemset/problem/1996/A",
-  "title": "Kite Ribbon Ledger",
-  "tags": [
-    "Algorithm Complexity and Big O Notation",
-    "Functions and Recursion"
-  ],
-  "model_breaking": true,
-  "time": 1,
-  "space": 32,
-  "new_colab_link": "https://colab.research.google.com/drive/1ugygKc2cRzTY3aF0dfeGg_iRMaeNkAa4",
-  "github_link": "https://github.com/MSFT-Codeforces/kite_ribbon_ledger"
+    "original": "https://www.codeforces.com/problemset/problem/1996/A",
+    "title": "Kite Ribbon Ledger",
+    "tags": [
+        "Algorithm Complexity and Big O Notation",
+        "Functions and Recursion"
+    ],
+    "model_breaking": true,
+    "time": 1,
+    "space": 32,
+    "new_colab_link": "https://colab.research.google.com/drive/1ugygKc2cRzTY3aF0dfeGg_iRMaeNkAa4",
+    "github_link": "https://github.com/MSFT-Codeforces/kite_ribbon_ledger"
 }

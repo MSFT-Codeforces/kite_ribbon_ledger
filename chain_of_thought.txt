@@ -12,7 +12,6 @@ $$
 2A + 4B = n
 $$
 with $A, B$ being nonnegative integers.
-
 **[atomic_01_02]**
 The supply rules restrict the allowed values of $A$ and $B$:
 - TwinTail kites arrive in cartons of exactly $c$ kites, so:
@@ -24,21 +23,18 @@ $$
 B \equiv 0 \pmod d
 $$
 These are strict divisibility constraints, not optional preferences.
-
 **[atomic_01_03]**
 The city parade requirement constrains the total number of kites:
 $$
 (A + B) \equiv 0 \pmod p
 $$
 So even if $A$ and $B$ satisfy ribbons and batch sizes, the pair is invalid unless their sum is divisible by $p$.
-
 **[atomic_01_04]**
 The objective is to minimize the total number of kites:
 $$
 K = A + B
 $$
 Among all feasible $(A, B)$ satisfying every rule, we must output the minimum possible $K$. If no feasible pair exists, we output $-1$.
-
 **[atomic_01_05]**
 All variables and constraints are integral and nonnegative. A “valid shipment” is therefore a pair $(A, B)$ such that:
 - $A, B \in \mathbb{Z}_{\ge 0}$
@@ -49,37 +45,36 @@ All variables and constraints are integral and nonnegative. A “valid shipment�
 
 The output must be one integer per test case: the minimum $K$ or $-1$.
 
+---
+
 **[section_02]**
 Enumerating edge cases and test scenarios that can break assumptions.
 **[atomic_02_01]**
 Odd $n$ is a fundamental edge case. Since $2A + 4B$ is always even for integers $A$ and $B$, any test with odd $n$ cannot have a solution. This should always produce output $-1$.
-
 **[atomic_02_02]**
 Very small $n$ (like $n = 2, 4, 6, 8$) combined with large batch sizes $c$ or $d$ can force impossibility. For example, if $c > n/2$, then the smallest positive multiple of $c$ already exceeds the maximum possible $A$ allowed by ribbons.
 
 These cases ensure the solution correctly handles situations where only $A = 0$ or $B = 0$ might be possible, or neither is possible.
-
 **[atomic_02_03]**
 Cases where one batch size is $1$ are important sanity checks:
 - If $c = 1$, the carton restriction on $A$ disappears.
 - If $d = 1$, the fleet restriction on $B$ disappears.
 
 Such tests verify that the logic does not incorrectly enforce extra divisibility constraints.
-
 **[atomic_02_04]**
 The case $p = 1$ is another sanity check. Since every integer is divisible by $1$, the condition $p \mid (A + B)$ becomes automatically true. These inputs help confirm that the output depends only on ribbons and the batch constraints when $p = 1$.
-
 **[atomic_02_05]**
 Large values near constraints (e.g. $n = 10^{18}$, $p = 10^{18}$) are important for correctness under big integer arithmetic. Even when the final answer is small or moderate, intermediate expressions involving products of parameters can become very large.
 
 Such tests are good for catching overflow-related errors in implementations.
-
 **[atomic_02_06]**
 Inconsistency can occur even when the ribbon equation admits integer solutions. For instance, it is possible that:
 - there exist $(A, B)$ with $2A + 4B = n$ and correct batch multiples,
 - but none of those satisfy $p \mid (A + B)$.
 
 These cases validate that every constraint must be enforced simultaneously and not treated independently.
+
+---
 
 **[section_03]**
 Implementing brute force over both shipment counts and observing why it fails.
@@ -95,7 +90,6 @@ $$
 2cy + 4dx = n
 $$
 We could try all pairs $(x, y)$, check the equation, then check whether $(A + B) \equiv 0 \pmod p$, and keep the minimum $A + B$.
-
 **[atomic_03_02]**
 This brute force can be bounded using the ribbon limits:
 - $4dx \le n \Rightarrow x \le \left\lfloor\frac{n}{4d}\right\rfloor$
@@ -106,21 +100,20 @@ $$
 \left(\frac{n}{4d}+1\right)\left(\frac{n}{2c}+1\right)
 $$
 pairs, most of which do not satisfy the exact ribbon equation.
-
 **[atomic_03_03]**
 Time complexity is quadratic in the worst case:
 $$
 O\left(\frac{n}{d} \cdot \frac{n}{c}\right)
 $$
 and space complexity is $O(1)$. With $n$ up to $10^{18}$, this approach is infeasible even for a single test case, regardless of constant-factor optimizations.
-
 **[atomic_03_04]**
 Beyond speed, this approach is conceptually wasteful: it treats $x$ and $y$ as independent, even though the ribbon equation tightly couples them. Nearly all work goes into rejecting invalid pairs.
 
 This motivates eliminating one variable to reduce the search dimension.
-
 **[atomic_03_05]**
 Conclusion: the full double enumeration is a failed approach due to its worst-case runtime. Any viable strategy must avoid iterating over a 2D grid of candidate shipments.
+
+---
 
 **[section_04]**
 Reducing enumeration to a single loop and identifying its worst-case limitation.
@@ -133,30 +126,28 @@ Now we only need to iterate over $x \ge 0$, compute $y$, and check:
 - $n - 4dx \ge 0$ (so $y \ge 0$),
 - $n - 4dx$ divisible by $2c$ (so $y$ is an integer),
 - and $(cy + dx) \equiv 0 \pmod p$ (total kites divisible by $p$).
-
 **[atomic_04_02]**
 The loop bound comes from $4dx \le n$:
 $$
 0 \le x \le L = \left\lfloor\frac{n}{4d}\right\rfloor
 $$
 So we would scan all $x$ in this range, update the best (minimum) $K = A + B$ whenever all conditions pass.
-
 **[atomic_04_03]**
 This reduces time complexity to:
 $$
 O(L) = O\left(\frac{n}{d}\right)
 $$
 which is strictly better than the quadratic brute force. Space remains $O(1)$.
-
 **[atomic_04_04]**
 However, the worst case still breaks it. If $d = 1$ and $n$ is near $10^{18}$, then:
 $$
 L \approx 2.5 \times 10^{17}
 $$
 A loop over $10^{17}$ iterations is not practical. This remains a failed approach under maximum constraints.
-
 **[atomic_04_05]**
 Conclusion: even single-dimensional enumeration cannot guarantee performance. We need a method that jumps directly to valid $x$ values using arithmetic constraints rather than checking each candidate sequentially.
+
+---
 
 **[section_05]**
 Solving the constraints using modular arithmetic and CRT to avoid enumeration.
@@ -168,7 +159,6 @@ $$
 If $n$ is odd, no solution exists because the left-hand side is always even. So odd $n$ immediately implies answer $-1$.
 
 Assume $n$ is even for the rest of this section.
-
 **[atomic_05_02]**
 Use the batch parameterization:
 - $B = dx$ for integer $x \ge 0$,
@@ -182,7 +172,6 @@ Divide by $2$:
 $$
 2dx + cy = \frac{n}{2}
 $$
-
 **[atomic_05_03]**
 Express the objective $K = A + B$ in terms of $x$. From:
 $$
@@ -193,14 +182,12 @@ $$
 K = cy + dx = \left(\frac{n}{2} - 2dx\right) + dx = \frac{n}{2} - dx
 $$
 Since $d > 0$, minimizing $K$ is equivalent to maximizing $x$.
-
 **[atomic_05_04]**
 The constraint $y \ge 0$ imposes an upper bound on $x$:
 $$
 \frac{n}{2} - 2dx \ge 0 \Rightarrow x \le \left\lfloor\frac{n}{4d}\right\rfloor = L
 $$
 So we want the largest feasible integer $x$ such that $0 \le x \le L$.
-
 **[atomic_05_05]**
 The condition “$y$ is an integer” becomes a congruence. From:
 $$
@@ -212,7 +199,6 @@ n - 4dx \equiv 0 \pmod{2c}
 \Rightarrow 4dx \equiv n \pmod{2c}
 $$
 This is a linear congruence in $x$.
-
 **[atomic_05_06]**
 The parade condition $p \mid (A + B)$ is:
 $$
@@ -223,7 +209,6 @@ So $x$ must satisfy two congruences simultaneously:
 $$
 4dx \equiv n \pmod{2c}, \qquad dx \equiv \frac{n}{2} \pmod p
 $$
-
 **[atomic_05_07]**
 To solve a single linear congruence
 $$
@@ -238,7 +223,6 @@ $$
 x \equiv b' \cdot (a')^{-1} \pmod{m'}
 $$
 This uses the extended Euclidean algorithm to compute inverses.
-
 **[atomic_05_08]**
 After solving both congruences, we obtain:
 $$
@@ -249,7 +233,6 @@ $$
 (r_2 - r_1) \equiv 0 \pmod{\gcd(m_1, m_2)}
 $$
 If inconsistent, there is no valid $x$, hence no valid shipment.
-
 **[atomic_05_09]**
 If consistent, CRT yields a combined congruence:
 $$
@@ -265,7 +248,6 @@ Then compute the minimal kite count by:
 $$
 K = \frac{n}{2} - dx
 $$
-
 **[atomic_05_10]**
 This number-theoretic approach improves strictly over enumeration:
 - It avoids scanning up to $L$ candidates.
@@ -273,25 +255,24 @@ This number-theoretic approach improves strictly over enumeration:
 
 Per test case, the time complexity is $O(\log N)$ where $N$ reflects the size of moduli (up to about $10^{18}$), and space complexity is $O(1)$. This is strictly better than the $O(n)$ scan in the previous section.
 
+---
+
 **[section_06]**
 Validating the derived conditions with targeted checks and invariants.
 **[atomic_06_01]**
 A key invariant is parity: if $n$ is odd, output must be $-1$. This should be treated as a hard precondition before performing any modular steps, because otherwise expressions like $\frac{n}{2}$ are not integral and the derived congruences no longer match the original integer problem.
-
 **[atomic_06_02]**
 The bound $x \le L = \left\lfloor\frac{n}{4d}\right\rfloor$ should be cross-checked against the original nonnegativity constraints. It comes directly from $n - 4dx \ge 0$, ensuring the computed:
 $$
 y = \frac{n - 4dx}{2c}
 $$
 is not only integral (by congruence) but also nonnegative (by the bound).
-
 **[atomic_06_03]**
 The transformation “minimize $K$ by maximizing $x$” should be checked for monotonicity:
 $$
 K = \frac{n}{2} - dx
 $$
 Because $d > 0$, increasing $x$ strictly decreases $K$. Therefore, among all feasible $x$, the maximal $x$ always yields the minimal $K$, with no exceptions.
-
 **[atomic_06_04]**
 After selecting $x$, it is useful to mentally verify the three conditions align:
 1. Ribbons: $2A + 4B = n$ holds by construction if $A = cy$ and $y = \frac{n - 4dx}{2c}$.
@@ -299,13 +280,14 @@ After selecting $x$, it is useful to mentally verify the three conditions align:
 3. Parade: $p \mid (A + B)$ is equivalent to the congruence $dx \equiv \frac{n}{2} \pmod p$ derived from $K$.
 
 This “round trip” consistency check helps confirm no constraint was lost during algebraic manipulation.
-
 **[atomic_06_05]**
 Special-value validation helps ensure the formulas behave at extremes:
 - If $x = 0$, then the shipment uses only TwinTail kites, and the formulas reduce to checking whether $n$ is divisible by $2c$ and whether $\frac{n}{2}$ is divisible by $p$ (since then $K = \frac{n}{2}$).
 - If $y = 0$, then the shipment uses only QuadTail kites, and the formulas reduce to checking whether $n$ is divisible by $4d$ and whether $\frac{n}{4}$ times $d$ interacts correctly with $p$ via $K = dx$.
 
 These are not alternate solution methods, but consistency checks on boundary behavior.
+
+---
 
 **[section_07]**
 Preventing arithmetic and modular pitfalls during implementation.
@@ -314,21 +296,18 @@ Intermediate values can exceed 64-bit limits even when inputs fit in 64-bit. Exa
 - Products like $4d$, $2c$, and especially terms like $m_1 \cdot m_2$ when forming an $\operatorname{lcm}$-like modulus during CRT merging.
 
 To avoid overflow, intermediate computations should use a wider integer representation (such as 128-bit arithmetic) for multiplication, modulus combination, and normalization steps.
-
 **[atomic_07_02]**
 Residue normalization must be handled consistently. When computing $x \bmod m$ in a language where the remainder may be negative, ensure residues are converted into the canonical range:
 $$
 0 \le r < m
 $$
 Incorrect normalization can cause false “no solution” decisions (e.g. comparing an unnormalized negative $r$ with $L$) or incorrect maximization when adding multiples of $M$.
-
 **[atomic_07_03]**
 Linear congruence solving requires careful handling of the gcd condition. For:
 $$
 a x \equiv b \pmod m,
 $$
 if $g = \gcd(a, m)$ does not divide $b$, there are no solutions and the test case must output $-1$. Skipping this check can lead to computing a modular inverse where none exists, producing meaningless results.
-
 **[atomic_07_04]**
 Generalized CRT merging also has an essential consistency check. For:
 $$
@@ -339,14 +318,12 @@ $$
 (r_2 - r_1) \equiv 0 \pmod{\gcd(m_1, m_2)}
 $$
 This is the modular equivalent of “the two arithmetic progressions intersect.” If this fails, the correct output is $-1$.
-
 **[atomic_07_05]**
 Edge moduli like $m = 1$ should be treated carefully:
 - Modulo $1$, every integer is congruent to $0$.
 - A congruence “$x \equiv r \pmod 1$” imposes no restriction on $x$.
 
 Handling $m = 1$ explicitly prevents division-by-zero-like issues in modular inverse steps and keeps CRT merging well-defined.
-
 **[atomic_07_06]**
 A practical correctness strategy is to test small random cases by exhaustive enumeration (only for small $n$ such as $n \le 200$) and compare against the number-theory result. This does not change the algorithm, but it helps catch subtle bugs in:
 - normalization,
