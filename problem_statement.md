@@ -24,7 +24,7 @@ Let $A$ be the number of TwinTail kites and $B$ be the number of QuadTail kites.
 - $(A + B) \equiv 0 \pmod p$
 - $A, B \ge 0$ and integers
 
-For each test case, output the minimum possible value of $A + B$, or $-1$ if it is impossible.
+A *valid shipment* is a pair $(A,B)$ of nonnegative integers satisfying all of the above constraints. For each test case, output the minimum value of $A + B$ over all valid shipments, or $-1$ if there is no valid shipment.
 
 **Input Format:-**
 
@@ -33,7 +33,7 @@ Each of the next $t$ lines contains four integers $n, c, d, p$.
 
 **Output Format:-**
 
-For each test case, print one integer — the minimum possible total number of kites, or $-1$ if no valid shipment exists.
+For each test case, print one integer — the minimum $A+B$ over valid shipments, or $-1$ if there is no valid shipment.
 
 **Constraints:-**
 
@@ -71,11 +71,13 @@ For each test case, print one integer — the minimum possible total number of k
 
 **Note:-**
 
-**First example:-**  
-$n=50$ so $2A+4B=50 \Rightarrow A+2B=25$. With $c=d=1$ there is no restriction on $A,B$, and we need $A+B$ divisible by $p=2$. Trying to minimize $A+B$ means taking $B$ as large as possible: $B=12$ gives $A=25-2\cdot 12=1$, so $A+B=13$ (not divisible by $2$); the next is $B=11$, $A=3$, giving $A+B=14$, which is divisible by $2$, so the answer is $14$.
+The **Examples** section above has two example blocks (two separate Input/Output pairs). The first subsection below derives the output for the **first example block** (one test case); the second subsection derives the output for each test case in the **second example block** (four test cases).
 
-**Second example:-**  
-- Test case 1: $n=3$ is odd, so $2A+4B$ can never equal $3$; hence no solution exists and the answer is $-1$.
-- Test case 2: $n=4$ so $A+2B=2$. Since $A\equiv 0\pmod 2$ and $B\equiv 0\pmod 2$, the only way to satisfy $A+2B=2$ is $A=2, B=0$, and then $A+B=2$ is divisible by $p=2$; the answer is $2$.
-- Test case 3: $n=24$ so $A+2B=12$. With $A\equiv 0\pmod 6$, possible values are $A=0,6,12$, giving $(B=6),(B=3),(B=0)$ respectively; however, in all cases $A+B\in\{6,9,12\}$, none of which is divisible by $p=5$, so the answer is $-1$.
-- Test case 4: $n=18$ so $A+2B=9$. With $A\equiv 0\pmod 3$ and $B\equiv 0\pmod 3$, $B$ can only be $0$ or $3$; $B=3$ would give $A=3$, so $A+B=6$, which is divisible by $p=1$, and it is also the minimum possible total, so the answer is $6$.
+**First example block (input: one test case with $n=50$, $c=d=1$, $p=2$; output: $14$):-**  
+$n=50$ so $2A+4B=50 \Rightarrow A+2B=25$. With $c=d=1$ there is no restriction on $A,B$, and we need $A+B$ divisible by $p=2$. Minimizing $A+B$ over valid shipments means taking $B$ as large as possible: $B=12$ gives $A=1$, $A+B=13$ (not divisible by $2$); $B=11$ gives $A=3$, $A+B=14$, which is divisible by $2$. So the answer is $14$.
+
+**Second example block (input: four test cases; output: $-1$, $2$, $-1$, $6$):-**  
+- Test case 1 ($n=3$, $c=d=p=1$): $n=3$ is odd, so $2A+4B$ can never equal $3$; no valid shipment ⇒ $-1$.
+- Test case 2 ($n=4$, $c=d=2$, $p=2$): $A+2B=2$ with $A,B\equiv 0\pmod 2$ ⇒ $A=2$, $B=0$; $A+B=2$ is divisible by $p=2$ ⇒ answer $2$.
+- Test case 3 ($n=24$, $c=6$, $d=1$, $p=5$): $A+2B=12$ with $A\equiv 0\pmod 6$ ⇒ $A\in\{0,6,12\}$ give $A+B\in\{6,9,12\}$, none divisible by $5$ ⇒ $-1$.
+- Test case 4 ($n=18$, $c=d=3$, $p=1$): $A+2B=9$ with $A,B\equiv 0\pmod 3$ ⇒ $B=3$, $A=3$, $A+B=6$ divisible by $p=1$ ⇒ answer $6$.
