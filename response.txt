@@ -77,6 +77,9 @@ odd, the answer must be $-1$.
    $$
 
 **3. Code**
+
+Code conventions in this solution: standard library only; single buffer read for fast I/O; descriptive variable names; docstrings for the module and functions. The code below follows these conventions.
+
 ```python
 import sys
 import math
@@ -318,19 +321,13 @@ if __name__ == "__main__":
 
 **4. Code Explanation**
 
-For each test case, the code:
+**Input parsing (end-to-end).** The code reads all input via `sys.stdin.buffer.read().split()` into a list of integer tokens. It consumes: (1) first token → $t$ (number of test cases); for each test case (2) next four tokens → $n$, $c$, $d$, $p$. An index advances through the list so each test case reads four consecutive values.
 
-1. Rejects odd $n$ immediately (prints `-1`), because $2A + 4B$ cannot be odd.
-2. Introduces the fleet count $x$ where $B = dx$, and bounds it by
-   $x \le \left\lfloor\frac{n}{4d}\right\rfloor$.
-3. Enforces integrality of the carton count $y$ via
-   $4dx \equiv n \pmod{2c}$.
-4. Enforces the parade condition via
-   $dx \equiv \frac{n}{2} \pmod p$.
-5. Solves both linear congruences, merges them using generalized CRT, and
-   obtains $x \equiv r \pmod M$.
-6. Picks the maximum feasible $x \le L$ from that arithmetic progression.
-7. Computes the minimum number of kites as $K = \frac{n}{2} - dx$ and prints it.
+**Components.** For each test case the code: (1) Rejects odd $n$ immediately (outputs $-1$), because $2A+4B$ cannot be odd. (2) Sets $B=dx$, $x\le L=\lfloor n/(4d)\rfloor$. (3) Enforces $y$ integral via $4dx\equiv n\pmod{2c}$. (4) Enforces parade via $dx\equiv n/2\pmod p$. (5) Solves both congruences, merges with generalized CRT to get $x\equiv r\pmod M$. (6) Picks maximum feasible $x\le L$ from that progression. (7) Outputs $K=n/2-dx$ or $-1$.
+
+**Sample walkthrough (Example 1).** One test case: $n=50$, $c=d=1$, $p=2$. $n$ even; $L=\lfloor 50/4\rfloor=12$. Congruences $4x\equiv 50\pmod 2$ (i.e. $0\equiv 0$) and $x\equiv 25\pmod 2$ give $x\equiv 1\pmod 2$. Max $x\le 12$ with $x\equiv 1$ is $x=11$, so $K=25-11=14$. Output **14**.
+
+**Example alignment:** For $n=18$, $c=d=3$, $p=1$, the merged congruence yields feasible $x=3$ (max $\le L$), so $K=9-3=6$, matching the second example test case 4.
 
 **5. Time and Space Complexity**
 
