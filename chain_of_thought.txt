@@ -51,13 +51,10 @@ Time complexity: This chain formalizes the specification and does not propose an
 
 **[section_02]**
 **Chain Title:** Walk through the statement's sample test cases and list edge scenarios for later validation.
-
 **[atomic_02_01]**
 **First sample (problem statement Example 1).** One test case: $n=50$, $c=d=1$, $p=2$. Then $A+2B=25$; we minimize $A+B$ with $A+B$ even. $B=12$ gives $A=1$, $A+B=13$ (odd); $B=11$ gives $A=3$, $A+B=14$ (even). Answer $14$.
-
 **[atomic_02_02]**
 **Second sample (problem statement Example 2).** Four test cases. (1) $n=3$: odd ⇒ $-1$. (2) $n=4$, $c=d=2$, $p=2$: $A+2B=2$ with $A,B$ even ⇒ $A=2,B=0$, $A+B=2$ ⇒ answer $2$. (3) $n=24$, $c=6$, $d=1$, $p=5$: $A=0,6,12$ give $A+B=6,9,12$, none divisible by $5$ ⇒ $-1$. (4) $n=18$, $c=d=3$, $p=1$: $A+2B=9$ with $A,B\equiv 0\pmod 3$ ⇒ $B=3$, $A=3$, $A+B=6$ ⇒ answer $6$.
-
 **[atomic_02_03]**
 Odd $n$ is a fundamental edge case. Since $2A + 4B$ is always even for integers $A$ and $B$, any test with odd $n$ cannot have a solution. This should always produce output $-1$.
 **[atomic_02_04]**

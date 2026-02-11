@@ -1,5 +1,3 @@
-**Kite Ribbon Ledger**
-
 Time Limit: **1 second**
 
 Memory Limit: **32 MB**
